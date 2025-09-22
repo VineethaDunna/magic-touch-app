@@ -1,98 +1,401 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from "react";
+import {
+	View,
+	Text,
+	ScrollView,
+	TouchableOpacity,
+	Image,
+	StyleSheet,
+	SafeAreaView,
+	Dimensions,
+} from "react-native";
+import { router } from "expo-router";
+import { Sparkles, Calendar, Phone, MapPin, Star } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+	return (
+		<SafeAreaView style={styles.container}>
+			<ScrollView showsVerticalScrollIndicator={false}>
+				{/* Header */}
+				<View style={styles.header}>
+					<View style={styles.headerLeft}>
+						<Image
+							source={require("@/assets/images/icon.png")}
+							style={styles.logo}
+						/>
+						<View>
+							<Text style={styles.title}>Magic Touch</Text>
+							<Text style={styles.subtitle}>
+								Beauty & Style, All in One Place
+							</Text>
+						</View>
+					</View>
+					<View style={styles.rating}>
+						<Star color='#FFD700' size={16} fill='#FFD700' />
+						<Text style={styles.ratingText}>4.9</Text>
+					</View>
+				</View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+				{/* Hero Section */}
+				<View style={styles.heroContainer}>
+					<LinearGradient
+						colors={["#FF69B4", "#FF1493"]}
+						style={styles.heroCard}>
+						<View style={styles.heroContent}>
+							<View style={styles.offerBadge}>
+								<Sparkles color='#FFD700' size={16} />
+								<Text style={styles.offerText}>Special Offer</Text>
+							</View>
+							<Text style={styles.heroTitle}>
+								Get 10% Off on Combo Packages
+							</Text>
+							<Text style={styles.heroSubtitle}>
+								Book multiple services and save more!
+							</Text>
+							<TouchableOpacity
+								style={styles.heroButton}
+								onPress={() => router.push("/parlour")}>
+								<Text style={styles.heroButtonText}>Explore Services</Text>
+							</TouchableOpacity>
+						</View>
+					</LinearGradient>
+				</View>
+
+				{/* Quick Access */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Quick Access</Text>
+					<View style={styles.quickAccessGrid}>
+						<TouchableOpacity
+							style={styles.quickAccessCard}
+							onPress={() => router.push("/parlour")}>
+							<Image
+								source={require("@/assets/images/icon.png")}
+								style={styles.quickAccessImage}
+							/>
+							<Text style={styles.quickAccessText}>Beauty Parlour</Text>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={styles.quickAccessCard}
+							onPress={() => router.push("/boutique")}>
+							<Image
+								source={require("@/assets/images/icon.png")}
+								style={styles.quickAccessImage}
+							/>
+							<Text style={styles.quickAccessText}>Boutique</Text>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={styles.quickAccessCard}
+							onPress={() => router.push("/portfolio")}>
+							<Image
+								source={require("@/assets/images/icon.png")}
+								style={styles.quickAccessImage}
+							/>
+							<Text style={styles.quickAccessText}>Portfolio</Text>
+						</TouchableOpacity>
+					</View>
+				</View>
+
+				{/* Featured Services */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Featured Services</Text>
+					<View style={styles.featuredServices}>
+						<View style={styles.serviceCard}>
+							<Image
+								source={require("@/assets/images/icon.png")}
+								style={styles.serviceImage}
+							/>
+							<View style={styles.serviceInfo}>
+								<Text style={styles.serviceName}>Bridal Makeup Package</Text>
+								<Text style={styles.serviceDescription}>
+									Complete bridal makeover
+								</Text>
+								<View style={styles.serviceDetails}>
+									<Text style={styles.price}>₹15,000</Text>
+									<View style={styles.ratingSmall}>
+										<Star color='#FFD700' size={12} fill='#FFD700' />
+										<Text style={styles.ratingSmallText}>5.0</Text>
+									</View>
+								</View>
+							</View>
+						</View>
+
+						<View style={styles.serviceCard}>
+							<Image
+								source={require("@/assets/images/icon.png")}
+								style={styles.serviceImage}
+							/>
+							<View style={styles.serviceInfo}>
+								<Text style={styles.serviceName}>Gold Facial</Text>
+								<Text style={styles.serviceDescription}>
+									Luxurious anti-aging treatment
+								</Text>
+								<View style={styles.serviceDetails}>
+									<Text style={styles.price}>₹1,500</Text>
+									<View style={styles.ratingSmall}>
+										<Star color='#FFD700' size={12} fill='#FFD700' />
+										<Text style={styles.ratingSmallText}>4.9</Text>
+									</View>
+								</View>
+							</View>
+						</View>
+					</View>
+				</View>
+
+				{/* Contact Info */}
+				<View style={styles.section}>
+					<LinearGradient
+						colors={["#FF69B420", "#FF149320"]}
+						style={styles.contactCard}>
+						<View style={styles.contactHeader}>
+							<Phone color='#FF69B4' size={20} />
+							<Text style={styles.contactTitle}>Contact Us</Text>
+						</View>
+						<View style={styles.contactInfo}>
+							<View style={styles.contactItem}>
+								<Phone color='#9CA3AF' size={14} />
+								<Text style={styles.contactText}>+91 90145 12860</Text>
+							</View>
+							<View style={styles.contactItem}>
+								<MapPin color='#9CA3AF' size={14} />
+								<Text style={styles.contactText}>
+									123 Beauty Street, Fashion City
+								</Text>
+							</View>
+							<View style={styles.contactItem}>
+								<Calendar color='#9CA3AF' size={14} />
+								<Text style={styles.contactText}>
+									Mon-Sun: 9:00 AM - 9:00 PM
+								</Text>
+							</View>
+						</View>
+					</LinearGradient>
+				</View>
+			</ScrollView>
+		</SafeAreaView>
+	);
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+	container: {
+		flex: 1,
+		backgroundColor: "#FFFFFF",
+	},
+	header: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+		backgroundColor: "rgba(255, 255, 255, 0.9)",
+		borderBottomWidth: 1,
+		borderBottomColor: "rgba(255, 105, 180, 0.2)",
+	},
+	headerLeft: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 12,
+	},
+	logo: {
+		width: 40,
+		height: 40,
+		borderRadius: 20,
+	},
+	title: {
+		fontSize: 18,
+		fontWeight: "bold",
+		color: "#1F2937",
+	},
+	subtitle: {
+		fontSize: 12,
+		color: "#9CA3AF",
+	},
+	rating: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 4,
+	},
+	ratingText: {
+		fontSize: 14,
+		fontWeight: "600",
+		color: "#FFD700",
+	},
+	heroContainer: {
+		paddingHorizontal: 16,
+		paddingVertical: 24,
+	},
+	heroCard: {
+		borderRadius: 16,
+		padding: 24,
+		alignItems: "center",
+	},
+	heroContent: {
+		alignItems: "center",
+	},
+	offerBadge: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
+		backgroundColor: "rgba(255, 255, 255, 0.2)",
+		paddingHorizontal: 16,
+		paddingVertical: 8,
+		borderRadius: 20,
+		marginBottom: 16,
+	},
+	offerText: {
+		color: "white",
+		fontSize: 14,
+		fontWeight: "500",
+	},
+	heroTitle: {
+		fontSize: 20,
+		fontWeight: "bold",
+		color: "white",
+		textAlign: "center",
+		marginBottom: 8,
+	},
+	heroSubtitle: {
+		fontSize: 14,
+		color: "rgba(255, 255, 255, 0.8)",
+		textAlign: "center",
+		marginBottom: 16,
+	},
+	heroButton: {
+		backgroundColor: "white",
+		paddingHorizontal: 24,
+		paddingVertical: 12,
+		borderRadius: 24,
+	},
+	heroButtonText: {
+		color: "#FF69B4",
+		fontSize: 16,
+		fontWeight: "600",
+	},
+	section: {
+		paddingHorizontal: 16,
+		marginBottom: 24,
+	},
+	sectionTitle: {
+		fontSize: 18,
+		fontWeight: "600",
+		marginBottom: 12,
+		color: "#1F2937",
+	},
+	quickAccessGrid: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+	},
+	quickAccessCard: {
+		alignItems: "center",
+		backgroundColor: "white",
+		borderRadius: 12,
+		padding: 12,
+		width: (width - 48) / 3,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
+		elevation: 3,
+	},
+	quickAccessImage: {
+		width: 60,
+		height: 60,
+		borderRadius: 8,
+		marginBottom: 8,
+	},
+	quickAccessText: {
+		fontSize: 12,
+		fontWeight: "500",
+		textAlign: "center",
+		color: "#1F2937",
+	},
+	featuredServices: {
+		gap: 12,
+	},
+	serviceCard: {
+		flexDirection: "row",
+		backgroundColor: "white",
+		borderRadius: 12,
+		padding: 12,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
+		elevation: 3,
+	},
+	serviceImage: {
+		width: 64,
+		height: 64,
+		borderRadius: 8,
+	},
+	serviceInfo: {
+		flex: 1,
+		marginLeft: 12,
+		justifyContent: "space-between",
+	},
+	serviceName: {
+		fontSize: 14,
+		fontWeight: "500",
+		color: "#1F2937",
+	},
+	serviceDescription: {
+		fontSize: 12,
+		color: "#9CA3AF",
+		marginTop: 2,
+	},
+	serviceDetails: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		marginTop: 8,
+	},
+	price: {
+		fontSize: 14,
+		fontWeight: "600",
+		color: "#FF69B4",
+		backgroundColor: "rgba(255, 105, 180, 0.1)",
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 8,
+	},
+	ratingSmall: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 4,
+	},
+	ratingSmallText: {
+		fontSize: 12,
+		color: "#9CA3AF",
+	},
+	contactCard: {
+		borderRadius: 16,
+		padding: 16,
+	},
+	contactHeader: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
+		marginBottom: 12,
+	},
+	contactTitle: {
+		fontSize: 18,
+		fontWeight: "600",
+		color: "#1F2937",
+	},
+	contactInfo: {
+		gap: 8,
+	},
+	contactItem: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 8,
+	},
+	contactText: {
+		fontSize: 14,
+		color: "#6B7280",
+	},
 });

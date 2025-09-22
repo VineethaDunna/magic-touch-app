@@ -1,35 +1,83 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Tabs } from "expo-router";
+import {
+	Home,
+	Scissors,
+	ShoppingBag,
+	User,
+	Camera,
+	ShoppingCart,
+} from "lucide-react-native";
+import AppHeader from "../../src/components/AppHeader";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
+	return (
+		<>
+			<AppHeader />
+			<Tabs
+				screenOptions={{
+					headerShown: false,
+					tabBarActiveTintColor: "#FF69B4",
+					tabBarInactiveTintColor: "#9CA3AF",
+					tabBarStyle: {
+						backgroundColor: "white",
+						borderTopWidth: 1,
+						borderTopColor: "#FF69B420",
+						paddingTop: 8,
+						paddingBottom: 8,
+						height: 70,
+					},
+				}}>
+				<Tabs.Screen
+					name='index'
+					options={{
+						title: "Home",
+						tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+					}}
+				/>
+				<Tabs.Screen
+					name='parlour'
+					options={{
+						title: "Parlour",
+						tabBarIcon: ({ color, size }) => (
+							<Scissors color={color} size={size} />
+						),
+					}}
+				/>
+				<Tabs.Screen
+					name='boutique'
+					options={{
+						title: "Boutique",
+						tabBarIcon: ({ color, size }) => (
+							<ShoppingBag color={color} size={size} />
+						),
+					}}
+				/>
+				<Tabs.Screen
+					name='portfolio'
+					options={{
+						title: "Portfolio",
+						tabBarIcon: ({ color, size }) => (
+							<Camera color={color} size={size} />
+						),
+					}}
+				/>
+				<Tabs.Screen
+					name='profile'
+					options={{
+						title: "Profile",
+						tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+					}}
+				/>
+				<Tabs.Screen
+					name='cart'
+					options={{
+						title: "Cart",
+						tabBarIcon: ({ color, size }) => (
+							<ShoppingCart color={color} size={size} />
+						),
+					}}
+				/>
+			</Tabs>
+		</>
+	);
 }
