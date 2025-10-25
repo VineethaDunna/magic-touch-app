@@ -1,4 +1,5 @@
-import React from "react";
+// HomeScreen.tsx (or app/index.tsx)
+import React, { useState } from "react";
 import {
 	View,
 	Text,
@@ -8,33 +9,143 @@ import {
 	StyleSheet,
 	SafeAreaView,
 	Dimensions,
+	FlatList,
+	Modal,
+	Pressable,
+	Alert,
 } from "react-native";
 import { router } from "expo-router";
-import { Sparkles, Calendar, Phone, MapPin, Star } from "lucide-react-native";
+import {
+	Sparkles,
+	Calendar,
+	Phone,
+	MapPin,
+	Star,
+	X,
+} from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useCartContext } from "../../src/context/CartContext";
 
 const { width } = Dimensions.get("window");
 
+const FEATURED = [
+	{
+		id: "combo-1",
+		title: "Beauty Essentials — Fast & Chic",
+		description: "Quick beauty pack to get you camera-ready.",
+		priceLabel: "Diwaali",
+		image: require("@/assets/images/gold-facial.webp"),
+		items: [
+			{ name: "Eyebrow", duration: "5 min" },
+			{ name: "Facial", duration: "45 min" },
+			{ name: "Manicure", duration: "30 min" },
+			{ name: "Pedicure", duration: "30 min" },
+			{ name: "Wax", duration: "10 min" },
+		],
+	},
+	{
+		id: "combo-2",
+		title: "Hair Care Pack — Relax & Shine",
+		description: "Cut, wash, spa — your hair’s new best day.",
+		priceLabel: "Dasara offer",
+		image: require("@/assets/beautyservices/30.webp"),
+		items: [
+			{ name: "Hair cut", duration: "20 min" },
+			{ name: "Hair wash", duration: "15 min" },
+			{ name: "Hair spa", duration: "30 min" },
+			{ name: "Dandruff treatment", duration: "30 min" },
+			{ name: "Oil massage", duration: "15 min" },
+		],
+	},
+];
+
 export default function HomeScreen() {
+	const [selected, setSelected] = useState<any>(null);
+	const [modalVisible, setModalVisible] = useState(false);
+
+	const openDetails = (item: any) => {
+		setSelected(item);
+		setModalVisible(true);
+	};
+
+	const closeDetails = () => {
+		setModalVisible(false);
+		setSelected(null);
+	};
+
+	const goToParlourCombos = () => {
+		// open parlour page and ask it to show combos via query param
+		// parlour screen should read this param (showCombos=true) and toggle
+		router.push("/parlour?showCombos=true");
+	};
+	// inside HomeScreen component
+	const { addToCart } = useCartContext();
+
+	// if selected comes from FEATURED (title, priceLabel)
+	const handleAddToCartFromModal = () => {
+		if (!selected) return Alert.alert("Oops", "Nothing selected");
+		// you can pass raw object — cart will normalize it
+		addToCart(selected, "combo"); // second arg is optional and ignored by cart, kept for compatibility
+		Alert.alert(
+			"Success",
+			`${selected?.title ?? selected?.name ?? "Combo"} added to cart`
+		);
+		closeDetails();
+	};
+
+	const handleViewMoreCombos = () => {
+		router.push("/parlour?showCombos=true");
+		closeDetails();
+	};
+
+	const renderFeatured = ({ item }: { item: any }) => {
+		return (
+			<View style={styles.featureCard}>
+				<TouchableOpacity activeOpacity={0.9} onPress={() => openDetails(item)}>
+					<Image
+						source={item.image}
+						style={styles.featureImage}
+						resizeMode='cover'
+					/>
+					<View style={styles.featureInfo}>
+						<View style={styles.featureRow}>
+							<Text style={styles.featureTitle}>{item.title}</Text>
+							<TouchableOpacity
+								style={styles.likeButton}
+								onPress={() => openDetails(item)}>
+								<Text style={styles.likeText}>❤</Text>
+							</TouchableOpacity>
+						</View>
+						<Text style={styles.featureDesc}>{item.description}</Text>
+						<View style={styles.featureBottom}>
+							<Text style={styles.priceTag}>{item.priceLabel}</Text>
+							<View style={styles.ratingSmall}>
+								<Star color='#FFD700' size={14} fill='#FFD700' />
+								<Text style={styles.ratingSmallText}>4.9</Text>
+							</View>
+						</View>
+					</View>
+				</TouchableOpacity>
+			</View>
+		);
+	};
+
 	return (
 		<SafeAreaView style={styles.container}>
-			<ScrollView showsVerticalScrollIndicator={false}>
+			<ScrollView
+				showsVerticalScrollIndicator={false}
+				contentContainerStyle={{ paddingBottom: 48 }}>
 				{/* Header */}
 				<View style={styles.header}>
 					<View style={styles.headerLeft}>
-						<Image
-							source={require("@/assets/images/icon.png")}
-							style={styles.logo}
-						/>
 						<View>
-							<Text style={styles.title}>Magic Touch</Text>
 							<Text style={styles.subtitle}>
 								Beauty & Style, All in One Place
 							</Text>
 						</View>
 					</View>
 					<View style={styles.rating}>
-						<Star color='#FFD700' size={16} fill='#FFD700' />
+						<Star color='#e2c004ff' size={20} fill='#FFD700' />
 						<Text style={styles.ratingText}>4.9</Text>
 					</View>
 				</View>
@@ -57,7 +168,7 @@ export default function HomeScreen() {
 							</Text>
 							<TouchableOpacity
 								style={styles.heroButton}
-								onPress={() => router.push("/parlour")}>
+								onPress={goToParlourCombos}>
 								<Text style={styles.heroButtonText}>Explore Services</Text>
 							</TouchableOpacity>
 						</View>
@@ -72,7 +183,7 @@ export default function HomeScreen() {
 							style={styles.quickAccessCard}
 							onPress={() => router.push("/parlour")}>
 							<Image
-								source={require("@/assets/images/icon.png")}
+								source={require("@/assets/images/beauty-parlour.jpg")}
 								style={styles.quickAccessImage}
 							/>
 							<Text style={styles.quickAccessText}>Beauty Parlour</Text>
@@ -82,7 +193,7 @@ export default function HomeScreen() {
 							style={styles.quickAccessCard}
 							onPress={() => router.push("/boutique")}>
 							<Image
-								source={require("@/assets/images/icon.png")}
+								source={require("@/assets/images/boutique.jpg")}
 								style={styles.quickAccessImage}
 							/>
 							<Text style={styles.quickAccessText}>Boutique</Text>
@@ -92,7 +203,7 @@ export default function HomeScreen() {
 							style={styles.quickAccessCard}
 							onPress={() => router.push("/portfolio")}>
 							<Image
-								source={require("@/assets/images/icon.png")}
+								source={require("@/assets/images/port.jpg")}
 								style={styles.quickAccessImage}
 							/>
 							<Text style={styles.quickAccessText}>Portfolio</Text>
@@ -100,50 +211,18 @@ export default function HomeScreen() {
 					</View>
 				</View>
 
-				{/* Featured Services */}
+				{/* Featured Services as List (large images) */}
 				<View style={styles.section}>
 					<Text style={styles.sectionTitle}>Featured Services</Text>
-					<View style={styles.featuredServices}>
-						<View style={styles.serviceCard}>
-							<Image
-								source={require("@/assets/images/icon.png")}
-								style={styles.serviceImage}
-							/>
-							<View style={styles.serviceInfo}>
-								<Text style={styles.serviceName}>Bridal Makeup Package</Text>
-								<Text style={styles.serviceDescription}>
-									Complete bridal makeover
-								</Text>
-								<View style={styles.serviceDetails}>
-									<Text style={styles.price}>₹15,000</Text>
-									<View style={styles.ratingSmall}>
-										<Star color='#FFD700' size={12} fill='#FFD700' />
-										<Text style={styles.ratingSmallText}>5.0</Text>
-									</View>
-								</View>
-							</View>
-						</View>
 
-						<View style={styles.serviceCard}>
-							<Image
-								source={require("@/assets/images/icon.png")}
-								style={styles.serviceImage}
-							/>
-							<View style={styles.serviceInfo}>
-								<Text style={styles.serviceName}>Gold Facial</Text>
-								<Text style={styles.serviceDescription}>
-									Luxurious anti-aging treatment
-								</Text>
-								<View style={styles.serviceDetails}>
-									<Text style={styles.price}>₹1,500</Text>
-									<View style={styles.ratingSmall}>
-										<Star color='#FFD700' size={12} fill='#FFD700' />
-										<Text style={styles.ratingSmallText}>4.9</Text>
-									</View>
-								</View>
-							</View>
-						</View>
-					</View>
+					<FlatList
+						data={FEATURED}
+						keyExtractor={(i) => i.id}
+						renderItem={renderFeatured}
+						ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+						contentContainerStyle={{ paddingBottom: 8 }}
+						scrollEnabled={false} // parent scroll handles it
+					/>
 				</View>
 
 				{/* Contact Info */}
@@ -158,24 +237,87 @@ export default function HomeScreen() {
 						<View style={styles.contactInfo}>
 							<View style={styles.contactItem}>
 								<Phone color='#9CA3AF' size={14} />
-								<Text style={styles.contactText}>+91 90145 12860</Text>
+								<Text style={styles.contactText}>+91 83413 38158</Text>
 							</View>
 							<View style={styles.contactItem}>
 								<MapPin color='#9CA3AF' size={14} />
 								<Text style={styles.contactText}>
-									123 Beauty Street, Fashion City
+									opp apollo pharmacy, prahaladapuram, simhachalam rd.
 								</Text>
 							</View>
 							<View style={styles.contactItem}>
 								<Calendar color='#9CA3AF' size={14} />
 								<Text style={styles.contactText}>
-									Mon-Sun: 9:00 AM - 9:00 PM
+									Everyday: 9:00 AM - 8:00 PM
 								</Text>
 							</View>
 						</View>
 					</LinearGradient>
 				</View>
 			</ScrollView>
+
+			{/* Details Modal */}
+			<Modal visible={modalVisible} animationType='slide' transparent>
+				<View style={styles.modalOverlay}>
+					<View style={styles.modalCard}>
+						{/* Header */}
+						<View style={styles.modalHeader}>
+							<Text style={styles.modalTitle}>{selected?.title}</Text>
+							<Pressable onPress={closeDetails} style={styles.modalClose}>
+								<X size={20} color='#374151' />
+							</Pressable>
+						</View>
+
+						{/* Image */}
+						<Image
+							source={selected?.image}
+							style={styles.modalImage}
+							resizeMode='cover'
+						/>
+
+						{/* Body */}
+						<ScrollView style={styles.modalBody}>
+							<Text style={styles.modalDesc}>{selected?.description}</Text>
+
+							<View style={styles.modalSection}>
+								<Text style={styles.modalSectionTitle}>Services included</Text>
+								{selected?.items?.map((it: any, idx: number) => (
+									<View key={idx} style={styles.modalItemRow}>
+										<Text style={styles.modalItemName}>{it.name}</Text>
+										<Text style={styles.modalItemDuration}>{it.duration}</Text>
+									</View>
+								))}
+							</View>
+
+							{/* Footer actions */}
+							<View style={[styles.modalFooter, { paddingBottom: 28 }]}>
+								<Text style={styles.modalPrice}>{selected?.priceLabel}</Text>
+
+								<View style={{ flexDirection: "row", alignItems: "center" }}>
+									{/* Add to Cart (primary) */}
+
+									{/* View more combos (secondary) */}
+									<TouchableOpacity
+										style={{
+											marginLeft: 10,
+											paddingHorizontal: 16,
+											paddingVertical: 10,
+											borderRadius: 10,
+											backgroundColor: "#FFFFFF",
+											borderWidth: 1,
+											borderColor: "#FF69B4",
+										}}
+										onPress={handleViewMoreCombos}>
+										<Text style={{ color: "#FF69B4", fontWeight: "700" }}>
+											View more combos
+										</Text>
+									</TouchableOpacity>
+								</View>
+							</View>
+						</ScrollView>
+					</View>
+				</View>
+			</Modal>
 		</SafeAreaView>
 	);
 }
@@ -198,17 +340,6 @@ const styles = StyleSheet.create({
 	headerLeft: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 12,
-	},
-	logo: {
-		width: 40,
-		height: 40,
-		borderRadius: 20,
-	},
-	title: {
-		fontSize: 18,
-		fontWeight: "bold",
-		color: "#1F2937",
 	},
 	subtitle: {
 		fontSize: 12,
@@ -217,13 +348,14 @@ const styles = StyleSheet.create({
 	rating: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 4,
 	},
 	ratingText: {
 		fontSize: 14,
-		fontWeight: "600",
-		color: "#FFD700",
+		fontWeight: "800",
+		color: "#e2c004ff",
+		marginLeft: 6,
 	},
+
 	heroContainer: {
 		paddingHorizontal: 16,
 		paddingVertical: 24,
@@ -239,17 +371,17 @@ const styles = StyleSheet.create({
 	offerBadge: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 8,
 		backgroundColor: "rgba(255, 255, 255, 0.2)",
-		paddingHorizontal: 16,
-		paddingVertical: 8,
+		paddingHorizontal: 12,
+		paddingVertical: 6,
 		borderRadius: 20,
-		marginBottom: 16,
+		marginBottom: 12,
 	},
 	offerText: {
 		color: "white",
 		fontSize: 14,
 		fontWeight: "500",
+		marginLeft: 8,
 	},
 	heroTitle: {
 		fontSize: 20,
@@ -275,6 +407,7 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: "600",
 	},
+
 	section: {
 		paddingHorizontal: 16,
 		marginBottom: 24,
@@ -285,6 +418,7 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 		color: "#1F2937",
 	},
+
 	quickAccessGrid: {
 		flexDirection: "row",
 		justifyContent: "space-between",
@@ -297,13 +431,13 @@ const styles = StyleSheet.create({
 		width: (width - 48) / 3,
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
+		shadowOpacity: 0.06,
 		shadowRadius: 4,
-		elevation: 3,
+		elevation: 2,
 	},
 	quickAccessImage: {
-		width: 60,
-		height: 60,
+		width: "100%",
+		height: "100",
 		borderRadius: 8,
 		marginBottom: 8,
 	},
@@ -313,64 +447,79 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		color: "#1F2937",
 	},
-	featuredServices: {
-		gap: 12,
-	},
-	serviceCard: {
-		flexDirection: "row",
-		backgroundColor: "white",
+
+	/* Featured list styles */
+	featureCard: {
 		borderRadius: 12,
-		padding: 12,
+		overflow: "hidden",
+		backgroundColor: "#fff",
+		marginHorizontal: 0,
 		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
+		shadowOffset: { width: 0, height: 3 },
+		shadowOpacity: 0.08,
+		shadowRadius: 6,
 		elevation: 3,
 	},
-	serviceImage: {
-		width: 64,
-		height: 64,
-		borderRadius: 8,
+	featureImage: {
+		width: width - 32,
+		height: 180,
 	},
-	serviceInfo: {
-		flex: 1,
-		marginLeft: 12,
-		justifyContent: "space-between",
+	featureInfo: {
+		padding: 12,
 	},
-	serviceName: {
-		fontSize: 14,
-		fontWeight: "500",
-		color: "#1F2937",
-	},
-	serviceDescription: {
-		fontSize: 12,
-		color: "#9CA3AF",
-		marginTop: 2,
-	},
-	serviceDetails: {
+	featureRow: {
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		marginTop: 8,
 	},
-	price: {
-		fontSize: 14,
+	featureTitle: {
+		fontSize: 16,
 		fontWeight: "600",
+		color: "#1F2937",
+		flex: 1,
+	},
+	likeButton: {
+		marginLeft: 12,
+		backgroundColor: "rgba(255,105,180,0.08)",
+		paddingHorizontal: 10,
+		paddingVertical: 6,
+		borderRadius: 20,
+	},
+	likeText: {
 		color: "#FF69B4",
-		backgroundColor: "rgba(255, 105, 180, 0.1)",
-		paddingHorizontal: 8,
-		paddingVertical: 4,
+		fontWeight: "700",
+	},
+	featureDesc: {
+		fontSize: 13,
+		color: "#6B7280",
+		marginTop: 6,
+	},
+	featureBottom: {
+		marginTop: 12,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+	},
+	priceTag: {
+		fontSize: 14,
+		fontWeight: "700",
+		color: "#FF69B4",
+		backgroundColor: "rgba(255,105,180,0.08)",
+		paddingHorizontal: 10,
+		paddingVertical: 6,
 		borderRadius: 8,
 	},
+
 	ratingSmall: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 4,
 	},
 	ratingSmallText: {
 		fontSize: 12,
 		color: "#9CA3AF",
+		marginLeft: 6,
 	},
+
 	contactCard: {
 		borderRadius: 16,
 		padding: 16,
@@ -378,24 +527,116 @@ const styles = StyleSheet.create({
 	contactHeader: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 8,
 		marginBottom: 12,
 	},
 	contactTitle: {
 		fontSize: 18,
 		fontWeight: "600",
 		color: "#1F2937",
+		marginLeft: 8,
 	},
-	contactInfo: {
-		gap: 8,
-	},
+	contactInfo: {},
 	contactItem: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 8,
+		marginBottom: 8,
 	},
 	contactText: {
 		fontSize: 14,
 		color: "#6B7280",
+		marginLeft: 8,
+	},
+
+	/* Modal styles */
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: "rgba(0,0,0,0.35)",
+		justifyContent: "flex-end",
+	},
+	modalCard: {
+		height: "80%",
+		backgroundColor: "#fff",
+		borderTopLeftRadius: 16,
+		borderTopRightRadius: 16,
+		overflow: "hidden",
+	},
+	modalHeader: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		paddingHorizontal: 16,
+		paddingTop: 12,
+		paddingBottom: 8,
+		borderBottomColor: "#F3F4F6",
+		borderBottomWidth: 1,
+	},
+	modalTitle: {
+		fontSize: 18,
+		fontWeight: "700",
+		color: "#1F2937",
+		flex: 1,
+	},
+	modalClose: {
+		padding: 8,
+		marginLeft: 12,
+	},
+	modalImage: {
+		width: "100%",
+		height: 160,
+	},
+	modalBody: {
+		paddingHorizontal: 16,
+		paddingTop: 12,
+	},
+	modalDesc: {
+		fontSize: 14,
+		color: "#6B7280",
+		marginBottom: 12,
+	},
+	modalSection: {
+		marginBottom: 12,
+	},
+	modalSectionTitle: {
+		fontSize: 15,
+		fontWeight: "600",
+		color: "#111827",
+		marginBottom: 8,
+	},
+	modalItemRow: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		paddingVertical: 8,
+		borderBottomColor: "#F3F4F6",
+		borderBottomWidth: 1,
+	},
+	modalItemName: {
+		fontSize: 14,
+		color: "#111827",
+	},
+	modalItemDuration: {
+		fontSize: 13,
+		color: "#6B7280",
+	},
+	modalFooter: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		marginTop: 12,
+		paddingBottom: 20,
+	},
+	modalPrice: {
+		fontSize: 16,
+		fontWeight: "700",
+		color: "#FF69B4",
+	},
+	modalAction: {
+		backgroundColor: "#FF69B4",
+		paddingHorizontal: 18,
+		paddingVertical: 10,
+		borderRadius: 10,
+	},
+	modalActionText: {
+		color: "#fff",
+		fontWeight: "700",
 	},
 });

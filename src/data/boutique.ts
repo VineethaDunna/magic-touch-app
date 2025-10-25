@@ -6,6 +6,11 @@ export const boutiqueCategories = [
 	"Party Wear",
 	"Accessories",
 ];
+const images = {
+	img1: require("../../assets/boutique/1.jpeg"),
+	img2: require("../../assets/boutique/2.jpeg"),
+	img3: require("../../assets/boutique/3.jpeg"),
+};
 
 export const boutiqueItems = [
 	{
@@ -13,7 +18,7 @@ export const boutiqueItems = [
 		name: "Designer Lehenga",
 		price: 8000,
 		category: "Bridal Wear",
-		image: "https://example.com/lehenga.jpg",
+		image: images.img1,
 		rating: 5.0,
 		time: "15 days",
 	},
@@ -22,7 +27,7 @@ export const boutiqueItems = [
 		name: "Party Gown",
 		price: 3500,
 		category: "Party Wear",
-		image: "https://example.com/gown.jpg",
+		image: images.img2,
 		rating: 4.8,
 		time: "7 days",
 	},
@@ -31,7 +36,7 @@ export const boutiqueItems = [
 		name: "Saree Blouse",
 		price: 1200,
 		category: "Ethnic Wear",
-		image: "https://example.com/blouse.jpg",
+		image: images.img3,
 		rating: 4.9,
 		time: "3 days",
 	},

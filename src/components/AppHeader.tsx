@@ -1,27 +1,45 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Menu, ShoppingCart } from "lucide-react-native";
-import { useCartContext } from "../context/CartContext"; // Adjust path as needed
-import { useRouter } from "expo-router";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { ShoppingCart } from "lucide-react-native";
+import { useCartContext } from "../context/CartContext";
+import { useRouter, useSegments } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-type AppHeaderProps = {
-	title?: string;
-	onMenuPress?: () => void;
-};
-
-const AppHeader = ({ title = "Magic Touch", onMenuPress }: AppHeaderProps) => {
+const AppHeader = ({ onMenuPress }: { onMenuPress?: () => void }) => {
 	const router = useRouter();
+	const segments = useSegments();
 	const { cartItems } = useCartContext();
 
+	// Map route -> header title
+	const getTitle = () => {
+		const route = segments[segments.length - 1]; // get last segment
+		switch (route) {
+			case "parlour":
+				return "Parlour Services";
+			case "portfolio":
+				return "our Happy customers";
+			case "boutique":
+				return "Boutique Collection";
+			case "cart":
+				return "My Cart";
+			case "profile":
+				return "About Us";
+			default:
+				return "Magic Touch";
+		}
+	};
+
 	return (
-		<SafeAreaView edges={["top"]} style={styles.safeArea}>
+		<SafeAreaView edges={["top"]} style={{ backgroundColor: "white" }}>
 			<View style={styles.container}>
 				<TouchableOpacity onPress={onMenuPress} style={styles.menuButton}>
-					<Menu size={24} color='#FF69B4' />
+					<Image
+						source={require("@/assets/images/icon.jpg")}
+						style={styles.logo}
+					/>
 				</TouchableOpacity>
 
-				<Text style={styles.title}>{title}</Text>
+				<Text style={styles.title}>{getTitle()}</Text>
 
 				<TouchableOpacity
 					style={styles.cartButton}
@@ -42,21 +60,30 @@ const AppHeader = ({ title = "Magic Touch", onMenuPress }: AppHeaderProps) => {
 };
 
 const styles = StyleSheet.create({
-	safeArea: {
-		backgroundColor: "white",
-	},
 	container: {
-		height: 56,
 		flexDirection: "row",
 		alignItems: "center",
+		marginTop: 10,
 		paddingHorizontal: 16,
 		justifyContent: "space-between",
 		borderBottomWidth: 1,
 		borderBottomColor: "#FF69B420",
 	},
-	menuButton: {
-		padding: 8,
+	logo: {
+		width: 60,
+		height: 60,
+		borderRadius: 20,
+		padding: 5,
+		// marginBottom: 0, <-- removed
+		borderWidth: 1,
+		shadowColor: "#d705adff",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.3,
+		shadowRadius: 3,
+		elevation: 5,
+		borderColor: "#d705adff",
 	},
+	menuButton: { padding: 8 },
 	title: {
 		fontSize: 18,
 		fontWeight: "bold",
@@ -64,9 +91,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		textAlign: "center",
 	},
-	cartButton: {
-		padding: 6,
-	},
+	cartButton: { padding: 6 },
 	badge: {
 		position: "absolute",
 		right: 0,

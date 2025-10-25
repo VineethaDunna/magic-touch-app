@@ -1,18 +1,22 @@
+// src/context/CartContext.tsx
 import React, { createContext, useContext, useState } from "react";
 
-type CartItem = {
+export type CartItem = {
 	id: string;
 	name: string;
 	price: number;
 	quantity: number;
-	image: string;
-	category: string;
-	time: string;
+	image?: string | any;
+	category?: string;
+	time?: string;
 };
 
 type CartContextType = {
 	cartItems: CartItem[];
-	addToCart: (item: CartItem) => void;
+	addToCart: (
+		item: Partial<CartItem> & Record<string, any>,
+		type?: "service" | "combo"
+	) => void;
 	removeFromCart: (id: string) => void;
 	updateQuantity: (id: string, quantity: number) => void;
 	clearCart: () => void;
@@ -29,50 +33,106 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// small helper to parse "Only 1,499" or "₹1,499" -> 1499
+const parsePriceLabel = (lbl?: string | number) => {
+	if (typeof lbl === "number") return lbl;
+	if (!lbl || typeof lbl !== "string") return null;
+	const m = lbl.match(/(\d[\d,]*)/);
+	if (!m) return null;
+	return Number(m[1].replace(/,/g, ""));
+};
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
 	const [cartItems, setCartItems] = useState<CartItem[]>([]);
 	const [isHomeService, setIsHomeService] = useState(false);
 
-	const addToCart = (item: CartItem) => {
-		const exist = cartItems.find((i) => i.id === item.id);
-		if (exist) {
-			setCartItems(
-				cartItems.map((i) =>
-					i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-				)
-			);
-		} else {
-			setCartItems([...cartItems, { ...item, quantity: 1 }]);
-		}
+	const addToCart = (
+		raw: Partial<CartItem> & Record<string, any>,
+		_type?: "service" | "combo"
+	) => {
+		// normalize fields from various screens (title -> name, priceLabel -> price)
+		const id = raw.id ?? raw._id ?? `tmp-${Date.now()}`;
+		const name = raw.name ?? raw.title ?? raw.serviceName ?? "Item";
+		const price =
+			typeof raw.price === "number"
+				? raw.price
+				: parsePriceLabel(raw.priceLabel ?? raw.amount ?? raw.priceText) ?? 0;
+		const image = raw.image ?? raw.img ?? "";
+		const category = raw.category ?? raw.type ?? "General";
+		const time =
+			raw.time ??
+			raw.duration ??
+			rawMinutesToString?.(raw) ??
+			raw.timeLabel ??
+			"0";
+
+		const normalized: CartItem = {
+			id,
+			name,
+			price,
+			quantity: raw.quantity ?? 1,
+			image,
+			category,
+			time,
+		};
+
+		setCartItems((prev) => {
+			const exist = prev.find((i) => i.id === normalized.id);
+			if (exist) {
+				return prev.map((i) =>
+					i.id === normalized.id ? { ...i, quantity: i.quantity + 1 } : i
+				);
+			} else {
+				return [...prev, normalized];
+			}
+		});
+	};
+
+	// fallback helper (optional): try to convert different time shapes to readable string
+	const rawMinutesToString = (r: any) => {
+		if (!r) return undefined;
+		if (typeof r === "string") return r;
+		if (r.minutes) return `${r.minutes} min`;
+		return undefined;
 	};
 
 	const removeFromCart = (id: string) => {
-		setCartItems(cartItems.filter((i) => i.id !== id));
+		setCartItems((prev) => prev.filter((i) => i.id !== id));
 	};
 
 	const updateQuantity = (id: string, quantity: number) => {
-		if (quantity <= 0) {
-			removeFromCart(id);
-		} else {
-			setCartItems(
-				cartItems.map((i) => (i.id === id ? { ...i, quantity } : i))
-			);
-		}
+		setCartItems((prev) =>
+			prev
+				.map((i) => (i.id === id ? { ...i, quantity } : i))
+				.filter((i) => i.quantity > 0)
+		);
 	};
 
 	const clearCart = () => setCartItems([]);
 
 	const getCartSummary = () => {
 		const subtotal = cartItems.reduce(
-			(sum, i) => sum + i.price * i.quantity,
+			(sum, i) => sum + (Number(i.price) || 0) * i.quantity,
 			0
 		);
-		const discount = subtotal >= 500 ? 50 : 0;
+
+		let discount = 0;
+		if (subtotal >= 1000) {
+			discount = subtotal * 0.1; // 10% off
+		} else if (subtotal >= 500) {
+			discount = subtotal * 0.05; // 5% off
+		}
+
 		const homeServiceCharge = isHomeService ? 100 : 0;
 		const total = subtotal - discount + homeServiceCharge;
-		const totalTime = cartItems.map((i) => i.time).join(", ");
+
+		const totalTime = cartItems
+			.map((i) => i.time || "")
+			.filter(Boolean)
+			.join(", ");
+
 		return { subtotal, discount, homeServiceCharge, total, totalTime };
 	};
 

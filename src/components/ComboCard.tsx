@@ -31,7 +31,7 @@ export default function ComboCard({ combo, onAddToCart }: ComboCardProps) {
 
 	return (
 		<View style={styles.container}>
-			<Image source={{ uri: combo.image }} style={styles.image} />
+			<Image source={combo.image} style={styles.image} />
 			<View style={styles.content}>
 				<Text style={styles.name}>{combo.name}</Text>
 				<FlatList

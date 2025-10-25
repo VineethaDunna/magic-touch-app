@@ -1,4 +1,6 @@
 import { Tabs } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+
 import {
 	Home,
 	Scissors,
@@ -12,6 +14,8 @@ import AppHeader from "../../src/components/AppHeader";
 export default function TabLayout() {
 	return (
 		<>
+			<StatusBar style='dark' backgroundColor='#ff69b4' />
+
 			<AppHeader />
 			<Tabs
 				screenOptions={{
@@ -62,19 +66,19 @@ export default function TabLayout() {
 					}}
 				/>
 				<Tabs.Screen
-					name='profile'
-					options={{
-						title: "Profile",
-						tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
-					}}
-				/>
-				<Tabs.Screen
 					name='cart'
 					options={{
 						title: "Cart",
 						tabBarIcon: ({ color, size }) => (
 							<ShoppingCart color={color} size={size} />
 						),
+					}}
+				/>
+				<Tabs.Screen
+					name='profile'
+					options={{
+						title: "About Us",
+						tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
 					}}
 				/>
 			</Tabs>

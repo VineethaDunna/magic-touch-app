@@ -63,14 +63,8 @@ export default function BoutiqueScreen() {
 	);
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<>
 			{/* Header */}
-			<View style={styles.header}>
-				<Text style={styles.headerTitle}>Boutique</Text>
-				<Text style={styles.headerSubtitle}>
-					Custom stitching & designer wear
-				</Text>
-			</View>
 
 			{/* Search */}
 			<View style={styles.searchContainer}>
@@ -117,7 +111,7 @@ export default function BoutiqueScreen() {
 					</View>
 				)}
 			</ScrollView>
-		</SafeAreaView>
+		</>
 	);
 }
 

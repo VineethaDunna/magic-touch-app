@@ -4,10 +4,11 @@ import {
 	Text,
 	TouchableOpacity,
 	ScrollView,
-	SafeAreaView,
 	Image,
 	StyleSheet,
+	Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
 	Trash2,
 	Plus,
@@ -17,8 +18,10 @@ import {
 	Clock,
 	Tag,
 } from "lucide-react-native";
-import { useCartContext } from "../src/context/CartContext";
+import { useCartContext } from "../../src/context/CartContext";
 import { router } from "expo-router";
+
+const { width } = Dimensions.get("window");
 
 export default function CartScreen() {
 	const {
@@ -41,37 +44,40 @@ export default function CartScreen() {
 		router.push("/booking");
 	};
 
+	// Empty cart
 	if (cartItems.length === 0) {
 		return (
-			<SafeAreaView style={styles.emptyContainer}>
-				<Store size={48} color='#FF69B4' style={styles.emptyIcon} />
-				<Text style={styles.emptyTitle}>Your cart is empty</Text>
-				<Text style={styles.emptyText}>Add some services to get started!</Text>
-				<TouchableOpacity
-					style={styles.exploreButton}
-					onPress={() => router.push("/parlour")}>
-					<Text style={styles.exploreButtonText}>Explore Services</Text>
-				</TouchableOpacity>
-			</SafeAreaView>
+			<>
+				<View style={styles.emptyContainer}>
+					<Store size={60} color='#FF69B4' style={styles.emptyIcon} />
+					<Text style={styles.emptyTitle}>Your cart is empty</Text>
+					<Text style={styles.emptyText}>
+						Add some services to get started!
+					</Text>
+					<TouchableOpacity
+						style={styles.exploreButton}
+						onPress={() => router.push("/parlour")}>
+						<Text style={styles.exploreButtonText}>Explore Services</Text>
+					</TouchableOpacity>
+				</View>
+			</>
 		);
 	}
 
 	return (
-		<SafeAreaView style={styles.container}>
-			<View style={styles.header}>
-				<Text style={styles.headerTitle}>Your Cart</Text>
-				<Text style={styles.headerSubtitle}>{cartItems.length} items</Text>
-			</View>
-
-			<ScrollView style={styles.scrollContainer}>
+		<>
+			<ScrollView
+				style={styles.scrollContainer}
+				contentContainerStyle={{ paddingBottom: 30 }}>
+				{/* Service Location Card */}
 				<View style={styles.serviceLocationCard}>
 					<Text style={styles.sectionTitle}>Service Location</Text>
 					<View style={styles.rowBetween}>
 						<View style={styles.row}>
 							{isHomeService ? (
-								<Home size={24} color='#FF69B4' />
+								<Home size={28} color='#FF69B4' />
 							) : (
-								<Store size={24} color='#FF69B4' />
+								<Store size={28} color='#FF69B4' />
 							)}
 							<View style={styles.locationTextWrapper}>
 								<Text style={styles.locationTitle}>
@@ -86,16 +92,25 @@ export default function CartScreen() {
 							style={styles.toggleButton}
 							onPress={() => setIsHomeService(!isHomeService)}>
 							<Text style={styles.toggleButtonText}>
-								{isHomeService ? "Home" : "Shop"}
+								{isHomeService ? "Tap to change shop" : "Tap to change Home"}
 							</Text>
 						</TouchableOpacity>
 					</View>
 				</View>
 
-				{/* Cart Items List */}
+				{/* Cart Items */}
 				{cartItems.map((item) => (
 					<View key={item.id} style={styles.cartItem}>
-						<Image source={{ uri: item.image }} style={styles.itemImage} />
+						<Image
+							source={
+								typeof item.image === "string"
+									? { uri: item.image }
+									: item.image
+							}
+							style={styles.itemImage}
+							onError={(error) => console.log("Image load error:", error)}
+							defaultSource={require("../../assets/beautyservices/1.jpeg")} // Add a placeholder
+						/>
 						<View style={styles.itemInfo}>
 							<Text style={styles.itemName}>{item.name}</Text>
 							<Text style={styles.itemCategory}>{item.category}</Text>
@@ -128,15 +143,18 @@ export default function CartScreen() {
 					</View>
 				))}
 
+				{/* Order Summary */}
 				<View style={styles.orderSummaryCard}>
 					<View style={styles.row}>
-						<Tag size={20} color='#FF69B4' />
-						<Text style={styles.sectionTitle}>Order Summary</Text>
+						<Tag size={22} color='#FF69B4' />
+						<Text style={[styles.sectionTitle, { marginLeft: 8 }]}>
+							Order Summary
+						</Text>
 					</View>
 					<View style={styles.orderSummary}>
 						<View style={styles.rowBetween}>
-							<Text>Subtotal</Text>
-							<Text>₹{summary.subtotal}</Text>
+							<Text style={styles.summaryText}>Subtotal</Text>
+							<Text style={styles.summaryText}>₹{summary.subtotal}</Text>
 						</View>
 						{summary.discount > 0 && (
 							<View style={styles.rowBetween}>
@@ -146,13 +164,15 @@ export default function CartScreen() {
 						)}
 						{summary.homeServiceCharge > 0 && (
 							<View style={styles.rowBetween}>
-								<Text>Home Service Charge</Text>
-								<Text>+₹{summary.homeServiceCharge}</Text>
+								<Text style={styles.summaryText}>Home Service Charge</Text>
+								<Text style={styles.summaryText}>
+									+₹{summary.homeServiceCharge}
+								</Text>
 							</View>
 						)}
 						<View style={styles.rowBetween}>
-							<Text>Estimated Time</Text>
-							<Text>{summary.totalTime}</Text>
+							<Text style={styles.summaryText}>Estimated Time</Text>
+							<Text style={styles.summaryText}>{summary.totalTime}</Text>
 						</View>
 						<View style={[styles.rowBetween, styles.orderTotal]}>
 							<Text style={styles.orderTotalText}>Total</Text>
@@ -161,6 +181,7 @@ export default function CartScreen() {
 					</View>
 				</View>
 
+				{/* Buttons */}
 				<TouchableOpacity
 					style={styles.checkoutButton}
 					onPress={handleCheckout}>
@@ -173,74 +194,61 @@ export default function CartScreen() {
 					<Text style={styles.clearButtonText}>Clear Cart</Text>
 				</TouchableOpacity>
 			</ScrollView>
-		</SafeAreaView>
+		</>
 	);
 }
 
 const styles = StyleSheet.create({
-	// General
-	container: { flex: 1, backgroundColor: "#fff" },
-	scrollContainer: { paddingHorizontal: 16, marginTop: 16 },
+	flexSafeArea: { flex: 1, backgroundColor: "#FAFAFA" },
+	scrollContainer: { paddingHorizontal: 20 },
 
 	// Empty cart
 	emptyContainer: {
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "white",
-		padding: 20,
+		backgroundColor: "#FFF0F6",
+		padding: 24,
+		borderRadius: 20,
 	},
 	emptyIcon: { marginBottom: 20 },
-	emptyTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
-	emptyText: { fontSize: 14, color: "#666", marginBottom: 20 },
+	emptyTitle: {
+		fontSize: 20,
+		fontWeight: "bold",
+		marginBottom: 8,
+		color: "#1F2937",
+	},
+	emptyText: { fontSize: 14, color: "#6B7280", marginBottom: 20 },
 	exploreButton: {
 		backgroundColor: "#FF69B4",
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 10,
+		paddingVertical: 14,
+		paddingHorizontal: 30,
+		borderRadius: 25,
 	},
 	exploreButtonText: {
 		color: "white",
 		fontWeight: "bold",
 		textAlign: "center",
-	},
-
-	// Header
-	header: {
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		borderBottomWidth: 1,
-		borderBottomColor: "#FFD1DC",
-	},
-	headerTitle: {
-		fontSize: 20,
-		fontWeight: "bold",
-		textAlign: "center",
-		color: "#1F2937",
-	},
-	headerSubtitle: {
-		fontSize: 12,
-		textAlign: "center",
-		color: "#9CA3AF",
-		marginTop: 4,
+		fontSize: 16,
 	},
 
 	// Service Location Card
 	serviceLocationCard: {
-		backgroundColor: "white",
-		padding: 16,
-		borderRadius: 20,
+		backgroundColor: "#FFFFFF",
+		padding: 20,
+		borderRadius: 25,
+		marginVertical: 12,
 		shadowColor: "#000",
-		shadowOpacity: 0.05,
-		shadowOffset: { width: 0, height: 0 },
-		elevation: 1,
-		marginBottom: 16,
+		shadowOpacity: 0.08,
+		shadowOffset: { width: 0, height: 2 },
+		shadowRadius: 8,
+		elevation: 3,
 	},
 	sectionTitle: {
 		fontSize: 18,
-		fontWeight: "600",
-		marginBottom: 8,
+		fontWeight: "700",
 		color: "#1F2937",
+		marginBottom: 12,
 	},
 	row: { flexDirection: "row", alignItems: "center" },
 	rowBetween: {
@@ -249,98 +257,97 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	locationTextWrapper: { marginLeft: 12 },
-	locationTitle: { fontWeight: "bold", color: "#1F2937", fontSize: 16 },
-	locationSubtitle: { color: "#9CA3AF", fontSize: 12 },
+	locationTitle: { fontWeight: "700", fontSize: 16, color: "#1F2937" },
+	locationSubtitle: { color: "#9CA3AF", fontSize: 12, marginTop: 2 },
 	toggleButton: {
-		backgroundColor: "#E5E7EB",
-		paddingVertical: 6,
-		paddingHorizontal: 14,
+		backgroundColor: "#93014aff",
+		paddingVertical: 8,
+		paddingHorizontal: 16,
 		borderRadius: 20,
 	},
-	toggleButtonText: { fontWeight: "bold", color: "#4B5563" },
+	toggleButtonText: { fontWeight: "700", color: "#f9fbfeff" },
 
 	// Cart Item
 	cartItem: {
 		flexDirection: "row",
-		backgroundColor: "white",
-		borderRadius: 20,
-		padding: 16,
+		backgroundColor: "#FFFFFF",
+		borderRadius: 25,
+		padding: 18,
 		marginBottom: 16,
 		shadowColor: "#000",
 		shadowOpacity: 0.05,
-		shadowOffset: { width: 0, height: 0 },
-		elevation: 2,
+		shadowOffset: { width: 0, height: 2 },
+		shadowRadius: 6,
+		elevation: 3,
 	},
-	itemImage: { width: 64, height: 64, borderRadius: 12 },
-	itemInfo: { flex: 1, marginLeft: 12 },
-	itemName: { fontWeight: "600", fontSize: 16, color: "#1F2937" },
+	itemImage: { width: 70, height: 70, borderRadius: 15 },
+	itemInfo: { flex: 1, marginLeft: 14 },
+	itemName: { fontWeight: "700", fontSize: 16, color: "#1F2937" },
 	itemCategory: { fontSize: 14, color: "#9CA3AF", marginVertical: 4 },
-	itemTime: { fontSize: 12, color: "#666", marginLeft: 4 },
-	itemPrice: { fontWeight: "bold", color: "#FF69B4", fontSize: 18 },
+	itemTime: { fontSize: 12, color: "#6B7280", marginLeft: 6 },
+	itemPrice: { fontWeight: "700", color: "#FF69B4", fontSize: 18 },
 
 	// Quantity controls
 	quantityControls: {
 		flexDirection: "row",
 		alignItems: "center",
-		marginTop: 8,
+		marginTop: 10,
 	},
-	quantityButton: {
-		backgroundColor: "#E5E7EB",
-		padding: 6,
-		borderRadius: 8,
-	},
+	quantityButton: { backgroundColor: "#F3F4F6", padding: 8, borderRadius: 10 },
 	quantityText: {
 		fontSize: 16,
-		width: 32,
+		width: 36,
 		textAlign: "center",
-		marginHorizontal: 8,
+		marginHorizontal: 10,
 	},
-	removeButton: { backgroundColor: "#FF69B4" },
+	removeButton: { backgroundColor: "#FF3366", marginLeft: 6 },
 
 	// Order Summary
 	orderSummaryCard: {
-		backgroundColor: "white",
-		padding: 16,
-		borderRadius: 20,
-		marginTop: 8,
-		marginBottom: 26,
+		backgroundColor: "#FFFFFF",
+		padding: 20,
+		borderRadius: 25,
+		marginVertical: 16,
 		shadowColor: "#000",
-		shadowOpacity: 0.05,
-		shadowOffset: { width: 0, height: 0 },
-		elevation: 2,
+		shadowOpacity: 0.08,
+		shadowOffset: { width: 0, height: 2 },
+		shadowRadius: 8,
+		elevation: 3,
 	},
-	orderSummary: { marginTop: 8 },
-	discountText: { color: "green" },
+	orderSummary: { marginTop: 12 },
+	summaryText: { fontSize: 14, color: "#1F2937", marginVertical: 2 },
+	discountText: { color: "#16A34A", fontWeight: "700" },
 	orderTotal: {
 		borderTopWidth: 1,
-		borderTopColor: "#DDD",
-		marginTop: 12,
-		paddingTop: 10,
+		borderTopColor: "#E5E7EB",
+		marginTop: 14,
+		paddingTop: 12,
 	},
-	orderTotalText: { fontWeight: "bold", fontSize: 16 },
+	orderTotalText: { fontWeight: "700", fontSize: 16, color: "#1F2937" },
 
 	// Buttons
 	checkoutButton: {
 		backgroundColor: "#FF69B4",
 		paddingVertical: 16,
-		borderRadius: 20,
-		marginBottom: 14,
+		borderRadius: 25,
+		marginBottom: 12,
 	},
 	checkoutButtonText: {
-		color: "white",
-		fontWeight: "bold",
+		color: "#FFFFFF",
+		fontWeight: "700",
 		fontSize: 18,
 		textAlign: "center",
 	},
 	clearButton: {
 		borderWidth: 2,
 		borderColor: "#FF69B4",
-		paddingVertical: 14,
-		borderRadius: 20,
+		paddingVertical: 16,
+		borderRadius: 25,
+		marginBottom: 20,
 	},
 	clearButtonText: {
 		color: "#FF69B4",
-		fontWeight: "bold",
+		fontWeight: "700",
 		fontSize: 16,
 		textAlign: "center",
 	},
